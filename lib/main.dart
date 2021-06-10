@@ -27,12 +27,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Controller'),
     );
   }
 }
-
-
 
 
 class MyHomePage extends StatefulWidget {
@@ -45,14 +43,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-  int _counter = 0;
   double x = 0;
   double y = 0;
   double z = 0;
 
+  double btnSize = 1.5;
+
   final pubTopic = 'test';
-  final builder = MqttClientPayloadBuilder();
+  final builder  = MqttClientPayloadBuilder();
+
+  bool  useGyro  = false;
+  String useGyroTxt = 'n';
 
   AccelerometerEvent? eve; 
   Timer? timer;
@@ -77,45 +78,104 @@ class _MyHomePageState extends State<MyHomePage> {
   } 
 
   void sendMsg(Timer t) {
-    builder.addString('{x:${this.x.toStringAsFixed(2)}, y:${this.y.toStringAsFixed(2)}, z: ${this.z.toStringAsFixed(2)}}\n');
-    client.publishMessage(pubTopic, MqttQos.atMostOnce, builder.payload);
+    if (useGyro) {
+      builder.addString('{x:${this.x.toStringAsFixed(2)}, y:${this.y.toStringAsFixed(2)}, z: ${this.z.toStringAsFixed(2)}}\n');
+      client.publishMessage(pubTopic, MqttQos.atMostOnce, builder.payload);
+    }
   }
 
   void listenGyro() {
-
     accelerometerEvents.listen((AccelerometerEvent event) {
       // print(event);
-      this.setState(() {
-        x = event.x;
-        y = event.y;
-        z = event.z;
-      });
+      if (useGyro == true) {
+        this.setState(() {
+          x = event.x;
+          y = event.y;
+          z = event.z;
+        });
+      }
       // sleep(Duration(milliseconds: 1000));
     });
+  }
+
+  void handleBtnSendMsg(int direction) {
+    /*
+    0: left
+    1: up
+    2: down
+    3: right
+    */
+    int sensitivity = 3;
+    switch (direction) {
+      case 0: 
+        builder.addString('{x:${0}, y:${-sensitivity}, z: ${0}}\n');
+        break;
+      case 1:
+        builder.addString('{x:${-sensitivity}, y:${0}, z: ${0}}\n');
+        break;
+      case 2:
+        builder.addString('{x:$sensitivity, y:${0}, z: ${0}}\n');
+        break;
+      case 3:
+        builder.addString('{x:${0}, y:$sensitivity, z: ${0}}\n');
+        break;
+    }
+    // builder.addString('{x:${0}, y:${-3}, z: ${0}\n');
+    client.publishMessage(pubTopic, MqttQos.atMostOnce, builder.payload);
+  }
+
+  void handleSwitchBtn() {
+    this.setState(() {
+      useGyro = ! useGyro;
+      useGyroTxt = (useGyro) ? 'Gyro' : 'n';
+    });
+  }
+
+  Widget buildDirectionBtn(context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [IconButton(onPressed: () => this.handleBtnSendMsg(0), icon: Icon(Icons.arrow_back, size: IconTheme.of(context).size! * btnSize,))],
+        ),
+        Column(
+          mainAxisAlignment:  MainAxisAlignment.center,
+          children: [
+            IconButton(onPressed: () => this.handleBtnSendMsg(1), icon: Icon(Icons.arrow_upward, size: IconTheme.of(context).size! * btnSize),),
+            IconButton(onPressed: () => this.handleBtnSendMsg(2), icon: Icon(Icons.arrow_downward, size: IconTheme.of(context).size! * btnSize),)
+          ],
+        ),
+        Column(
+          mainAxisAlignment:  MainAxisAlignment.center,
+          children: [IconButton(onPressed: () => this.handleBtnSendMsg(3), icon: Icon(Icons.arrow_forward, size: IconTheme.of(context).size! * btnSize),)],
+        ),
+      ],
+    );
+  }
+
+  Widget buildSwitchBtn(context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        IconButton(onPressed: this.handleSwitchBtn, icon: Icon(Icons.compare_arrows, size: IconTheme.of(context).size! * btnSize ),)
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text( '${widget.title} - $useGyroTxt'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            Text(
-              'gyro listening....',
-            ),
-            Text(
-              'y: ${y.toStringAsFixed(2)}',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            Text(
-              'x: ${x.toStringAsFixed(2)}',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            FloatingActionButton(onPressed: this.btnEvent)
+            buildDirectionBtn(context),
+            buildSwitchBtn(context),
           ],
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
