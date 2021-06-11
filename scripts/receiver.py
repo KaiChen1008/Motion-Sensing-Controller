@@ -3,10 +3,10 @@
 import paho.mqtt.client as mqtt
 from pynput.keyboard import Controller
 import json
-# ip = '169.254.57.236'
+
 ip = '192.168.0.164'
 
-sens = 2
+sens = 1
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
@@ -19,7 +19,6 @@ def on_message(client, userdata, msg):
     # keyboard.release(key)
     # m = msg.payload
     data = json.loads(msg.payload.decode('utf-8'))
-    print(data['x'])
     if data['y'] <= -sens:
         # left
         key = 'a'
@@ -36,7 +35,6 @@ def on_message(client, userdata, msg):
         keyboard.press(key)
         keyboard.release(key)
         print(f'enter {key}')
-
     pass
 
 client   = mqtt.Client()

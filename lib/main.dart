@@ -5,26 +5,30 @@ import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
-
+import 'configs.dart';
+import 'input.dart';
 // const url = '192.168.100.147';       //主機位置
-const url = '192.168.0.164';
+// const url = '192.168.0.164';
 // const url = '127.0.0.1';        //主機位置
-const port = 1883;              //MQTT port
-const clientID = 'Client01';    //Mqtt Client
-const username = 'Client01';    //Mqtt username
-const password = 'password';    //Mqtt password
-final client = MqttServerClient(url, clientID);
 
-// void main() {
+// var client = MqttServerClient(url, clientID);
+var client;
+
+void main() {
+  runApp(InputApp());
+}
+
+// void main() async {
+//   await client.connect(username, password);
 //   runApp(MyApp());
 // }
 
-void main() async {
-  await client.connect(username, password);
-  runApp(MyApp());
-}
-
 class MyApp extends StatelessWidget {
+
+  MyApp({Key? key, required this.url}): super(key:key);
+
+  final String url;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -32,16 +36,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Controller'),
+      home: MyHomePage(title: 'Controller', url: this.url),
     );
   }
 }
 
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title, required this.url}) : super(key: key);
 
   final String title;
+  final String url;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -64,8 +69,17 @@ class _MyHomePageState extends State<MyHomePage> {
   Timer? timer;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
+    
+    asyncMethod();
+  }
+
+  void asyncMethod() async {
+    client = MqttServerClient(widget.url, clientID);
+    await client.connect(username, password);
+
+    print('connected');
     const duration = const Duration(milliseconds:100);
     timer = new Timer.periodic(duration, this.sendMsg);
 
