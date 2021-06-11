@@ -6,13 +6,18 @@ import 'package:sensors_plus/sensors_plus.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
-const url = '192.168.100.147';       //主機位置
+// const url = '192.168.100.147';       //主機位置
+const url = '192.168.0.164';
 // const url = '127.0.0.1';        //主機位置
 const port = 1883;              //MQTT port
 const clientID = 'Client01';    //Mqtt Client
 const username = 'Client01';    //Mqtt username
 const password = 'password';    //Mqtt password
 final client = MqttServerClient(url, clientID);
+
+// void main() {
+//   runApp(MyApp());
+// }
 
 void main() async {
   await client.connect(username, password);
@@ -79,8 +84,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void sendMsg(Timer t) {
     if (useGyro) {
-      builder.addString('{x:${this.x.toStringAsFixed(2)}, y:${this.y.toStringAsFixed(2)}, z: ${this.z.toStringAsFixed(2)}}\n');
-      client.publishMessage(pubTopic, MqttQos.atMostOnce, builder.payload);
+      builder.addString('{"x":${this.x.toStringAsFixed(2)}, "y":${this.y.toStringAsFixed(2)}, "z": ${this.z.toStringAsFixed(2)}}');
+      client.publishMessage(pubTopic, MqttQos.exactlyOnce, builder.payload);
+      builder.payload.clear();
     }
   }
 
@@ -108,20 +114,21 @@ class _MyHomePageState extends State<MyHomePage> {
     int sensitivity = 3;
     switch (direction) {
       case 0: 
-        builder.addString('{x:${0}, y:${-sensitivity}, z: ${0}}\n');
+        builder.addString('{"x":${0}, "y":${-sensitivity}, "z":${0}}');
         break;
       case 1:
-        builder.addString('{x:${-sensitivity}, y:${0}, z: ${0}}\n');
+        builder.addString('{"x":${-sensitivity}, "y":${0}, "z": ${0}}');
         break;
       case 2:
-        builder.addString('{x:$sensitivity, y:${0}, z: ${0}}\n');
+        builder.addString('{"x":$sensitivity, "y":${0}, "z": ${0}}');
         break;
       case 3:
-        builder.addString('{x:${0}, y:$sensitivity, z: ${0}}\n');
+        builder.addString('{"x":${0}, "y":$sensitivity, "z": ${0}}');
         break;
     }
     // builder.addString('{x:${0}, y:${-3}, z: ${0}\n');
-    client.publishMessage(pubTopic, MqttQos.atMostOnce, builder.payload);
+    client.publishMessage(pubTopic, MqttQos.exactlyOnce, builder.payload);
+    builder.payload.clear();
   }
 
   void handleSwitchBtn() {
