@@ -19,9 +19,9 @@ if (NOT MSVC AND NOT MINGW)
 endif()
 
 # Under MinGW, statically link against the standard libraries
-if (MINGW)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
-endif()
+# if (MINGW)
+# 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
+# endif()
 
 # Force WebSocket++ to use 100% C++11 mode, so that it doesn't try to look for Boost
 # (Note that under MinGW, Boost.Thread is still required, due to a bug in MinGW that prevents the C++11 version from being used)
