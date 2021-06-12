@@ -1,14 +1,10 @@
-import 'dart:ffi';
 import 'dart:async';
-import 'dart:io'; // File, socket, HTTP, and other I/O support for non-web applications.
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
-import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'configs.dart';
 import 'input.dart';
-var client;
-
 void main() {
   runApp(InputApp());
 }
@@ -46,63 +42,52 @@ class _MyHomePageState extends State<MyHomePage> {
   double x = 0;
   double y = 0;
   double z = 0;
-
+  bool   mode    = false; // false: btn, true: gyro
   double btnSize = 1.5;
 
-  final pubTopic = 'test';
-  final builder  = MqttClientPayloadBuilder();
-
-  bool   useGyro  = false;
-  String useGyroTxt = 'n';
   Timer? timer;
+  WebSocketChannel? channel;
+  final duration = Duration(milliseconds:16); // 1/60 fps = 16.66 milli-sec
 
   @override
   void initState() {
     super.initState();
-
-    asyncMethod();
-  }
-
-  void asyncMethod() async {
-    client = MqttServerClient(widget.url, clientID);
-    await client.connect(username, password);
-
-    print('connected');
-    const duration = const Duration(milliseconds:10);
-    timer = new Timer.periodic(duration, this.sendMsg);
-
-    listenGyro();
+    connectToServer();
   }
 
   @override 
   void dispose() {
     timer?.cancel();
+    channel?.sink.close();
     super.dispose();
   }
 
-  void btnEvent() {
-    print('sended');
-  } 
+  void connectToServer() async {
+    channel = new WebSocketChannel.connect( Uri.parse('ws://${widget.url}:8080'));//'ws://echo.websocket.org');
+    print('connected');
 
-  void sendMsg(Timer t) {
-    if (useGyro) {
-      builder.addString('{"x":${this.x.toStringAsFixed(2)}, "y":${this.y.toStringAsFixed(2)}, "z": ${this.z.toStringAsFixed(2)}}');
-      client.publishMessage(pubTopic, MqttQos.exactlyOnce, builder.payload);
-      builder.payload.clear();
+    timer = new Timer.periodic(duration, this.gyroSendMsg);
+
+    listenGyro();
+  }
+  
+  void gyroSendMsg(Timer t) {
+    if (mode == true) { // use gyro
+      // send data to server
+      var msg = '{"x": $x, "y":$y, "z": $z, "__MESSAGE__":"message"}';
+      channel?.sink.add(msg);
     }
   }
 
   void listenGyro() {
     accelerometerEvents.listen((AccelerometerEvent event) {
-      // print(event);
-      if (useGyro == true) {
+      if (mode == true) {
         this.setState(() {
           x = event.x;
           y = event.y;
           z = event.z;
         });
       }
-      // sleep(Duration(milliseconds: 1000));
     });
   }
 
@@ -114,31 +99,38 @@ class _MyHomePageState extends State<MyHomePage> {
     3: right
     */
     int sensitivity = 3;
+    var msg;
     switch (direction) {
       case 0: 
-        builder.addString('{"x":${0}, "y":${-sensitivity}, "z":${0}}');
+        msg = '{"x":${0}, "y":${-sensitivity}, "z":${0},  "__MESSAGE__":"message"}';
         break;
       case 1:
-        builder.addString('{"x":${-sensitivity}, "y":${0}, "z": ${0}}');
+        msg = '{"x":${-sensitivity}, "y":${0}, "z": ${0}, "__MESSAGE__":"message"}';
         break;
       case 2:
-        builder.addString('{"x":$sensitivity,s "y":${0}, "z": ${0}}');
+        msg = '{"x":$sensitivity, "y":${0}, "z": ${0},    "__MESSAGE__":"message"}';
         break;
       case 3:
-        builder.addString('{"x":${0}, "y":$sensitivity, "z": ${0}}');
+        msg = '{"x":${0}, "y":$sensitivity, "z": ${0},    "__MESSAGE__":"message"}';
         break;
     }
-    // builder.addString('{x:${0}, y:${-3}, z: ${0}\n');
+    // print(msg);
+    channel?.sink.add(msg);
 
-    client.publishMessage(pubTopic, MqttQos.exactlyOnce, builder.payload);
-    builder.payload.clear();
   }
 
   void handleSwitchBtn() {
     this.setState(() {
-      useGyro = ! useGyro;
-      useGyroTxt = (useGyro) ? 'Gyro' : 'n';
+      mode = ! mode;
     });
+
+    var msg = '{"m":${(mode)? '1': '0'},  "__MESSAGE__":"message"}';
+    channel?.sink.add(msg);
+  }
+
+  void handleEnterBtn() { // mimic pressing whitespace on a keyboard
+    var msg = '{"w":1,  "__MESSAGE__":"message"}';
+    channel?.sink.add(msg);
   }
 
   Widget buildDirectionBtn(context) {
@@ -168,7 +160,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        IconButton(onPressed: this.handleSwitchBtn, icon: Icon(Icons.compare_arrows, size: IconTheme.of(context).size! * btnSize ),)
+        IconButton(onPressed: this.handleSwitchBtn, icon: Icon(Icons.compare_arrows, size: IconTheme.of(context).size! * btnSize ),),
+        IconButton(onPressed: this.handleEnterBtn,  icon: Icon(Icons.not_started, size: IconTheme.of(context).size! * btnSize ),)
       ],
     );
   }
@@ -177,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text( '${widget.title} - $useGyroTxt'),
+        title: Text( '${widget.title} - ${(mode) ? 'Gyro' : 'n'}'),
       ),
       body: Center(
         child: Row(
