@@ -105,10 +105,10 @@ class _MyHomePageState extends State<MyHomePage> {
         msg = '{"x":${0}, "y":${-sensitivity}, "z":${0},  "__MESSAGE__":"message"}';
         break;
       case 1:
-        msg = '{"x":${-sensitivity}, "y":${0}, "z": ${0}, "__MESSAGE__":"message"}';
+        msg = '{"x":$sensitivity, "y":${0}, "z": ${0}, "__MESSAGE__":"message"}';
         break;
       case 2:
-        msg = '{"x":$sensitivity, "y":${0}, "z": ${0},    "__MESSAGE__":"message"}';
+        msg = '{"x":${-sensitivity}, "y":${0}, "z": ${0},    "__MESSAGE__":"message"}';
         break;
       case 3:
         msg = '{"x":${0}, "y":$sensitivity, "z": ${0},    "__MESSAGE__":"message"}';
