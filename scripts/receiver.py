@@ -1,47 +1,16 @@
-# pip install paho-mqtt pynput
+# import pyautogui
+# pyautogui.PAUSE = 2.5
+from time import sleep
 
-import paho.mqtt.client as mqtt
-from pynput.keyboard import Controller
-import json
 
-ip = '192.168.0.164'
+# print('hellp')
+# pyautogui.keyDown("a") #pressing down key 'a'
+# sleep(10) #how ever long you want
+# # keyUp("a") #stop pressing key 'a' downc
+import keyboard
 
-sens = 1
-
-def on_connect(client, userdata, flags, rc):
-    print("Connected with result code "+str(rc))
-    client.subscribe("test")
-
-def on_message(client, userdata, msg):
-    # print(msg.topic+" "+ msg.payload.decode('utf-8'))
-    key = None
-    # keyboard.press(key)
-    # keyboard.release(key)
-    # m = msg.payload
-    data = json.loads(msg.payload.decode('utf-8'))
-    if data['y'] <= -sens:
-        # left
-        key = 'a'
-    elif data['y'] >= sens:
-        # right
-        key = 'd'
-    elif data['x'] <= -sens:
-        # up
-        key = 'w'
-    elif data['x'] >= sens:
-        key = 's'
-
-    if key != None:
-        keyboard.press(key)
-        keyboard.release(key)
-        print(f'enter {key}')
-    pass
-
-client   = mqtt.Client()
-keyboard = Controller()
-
-client.on_connect = on_connect
-client.on_message = on_message
-
-client.connect(ip, 1883, 60)
-client.loop_forever()
+while True:
+    keyboard.press('a')
+    keyboard.press('a')
+    keyboard.press('a')
+    keyboard.press('a')

@@ -1,27 +1,17 @@
 import 'dart:ffi';
 import 'dart:async';
-import 'dart:io';
+import 'dart:io'; // File, socket, HTTP, and other I/O support for non-web applications.
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'configs.dart';
 import 'input.dart';
-// const url = '192.168.100.147';       //主機位置
-// const url = '192.168.0.164';
-// const url = '127.0.0.1';        //主機位置
-
-// var client = MqttServerClient(url, clientID);
 var client;
 
 void main() {
   runApp(InputApp());
 }
-
-// void main() async {
-//   await client.connect(username, password);
-//   runApp(MyApp());
-// }
 
 class MyApp extends StatelessWidget {
 
@@ -62,16 +52,14 @@ class _MyHomePageState extends State<MyHomePage> {
   final pubTopic = 'test';
   final builder  = MqttClientPayloadBuilder();
 
-  bool  useGyro  = false;
+  bool   useGyro  = false;
   String useGyroTxt = 'n';
-
-  AccelerometerEvent? eve; 
   Timer? timer;
 
   @override
   void initState() {
     super.initState();
-    
+
     asyncMethod();
   }
 
@@ -80,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
     await client.connect(username, password);
 
     print('connected');
-    const duration = const Duration(milliseconds:100);
+    const duration = const Duration(milliseconds:10);
     timer = new Timer.periodic(duration, this.sendMsg);
 
     listenGyro();
@@ -134,13 +122,14 @@ class _MyHomePageState extends State<MyHomePage> {
         builder.addString('{"x":${-sensitivity}, "y":${0}, "z": ${0}}');
         break;
       case 2:
-        builder.addString('{"x":$sensitivity, "y":${0}, "z": ${0}}');
+        builder.addString('{"x":$sensitivity,s "y":${0}, "z": ${0}}');
         break;
       case 3:
         builder.addString('{"x":${0}, "y":$sensitivity, "z": ${0}}');
         break;
     }
     // builder.addString('{x:${0}, y:${-3}, z: ${0}\n');
+
     client.publishMessage(pubTopic, MqttQos.exactlyOnce, builder.payload);
     builder.payload.clear();
   }
