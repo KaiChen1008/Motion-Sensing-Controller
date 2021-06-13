@@ -1,16 +1,39 @@
-# gyro_broadcast
+# MotionSensing
 
-A new Flutter project.
+## TLDR
+Turn your cellphone to a 3D motion sensing controller.
 
-## Getting Started
+## Details
+// 原因
+This project is fully developed by Fullter 2.2 and can deploy on both Android and IOS cellphones.
+The goal of this project is to play vedio games using 3D motion.
+It is part of Graphic OpenGl Game Project.
 
-This project is a starting point for a Flutter application.
+## Prerequisites
+- Flutter 2.0
 
-A few resources to get you started if this is your first Flutter project:
+## Usage
+1. Installing
+```
+git clone https://github.com/KaiChen1008/flutter-gyro-mqtt-app
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+flutter pub get
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+// for ios
+cd ios && pod install && cd ..
+
+flutter run --release
+```
+
+2. Launch the game which is integrated with websocket server.
+    - See server/ for more details
+    - You can find a demo game [here]()
+
+3. Enter the ip of your computer.
+
+
+4. Enjoy your game.
+
+
+## ToDo
+[] UI
