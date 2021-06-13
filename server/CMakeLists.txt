@@ -20,7 +20,7 @@ endif()
 
 # Under MinGW, statically link against the standard libraries
 # if (MINGW)
-# 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
 # endif()
 
 # Force WebSocket++ to use 100% C++11 mode, so that it doesn't try to look for Boost
@@ -28,11 +28,23 @@ endif()
 add_definitions(-D_WEBSOCKETPP_CPP11_STRICT_)
 
 # Add the third-party headers directory to the search path
-include_directories(SYSTEM "${PROJECT_SOURCE_DIR}/external")
+# include_directories(SYSTEM "${PROJECT_SOURCE_DIR}/external")
 
-# Compile jsoncpp from source
-add_library(jsoncpp STATIC ${PROJECT_SOURCE_DIR}/external/jsoncpp.cpp)
+# # Compile jsoncpp from source
+# add_library(jsoncpp STATIC ${PROJECT_SOURCE_DIR}/external/jsoncpp.cpp)
+
+############################################################################################################
+find_package(asio CONFIG REQUIRED)
+# find_package(Boost REQUIRED [COMPONENTS asio])
+find_package(websocketpp CONFIG REQUIRED)
+find_package(jsoncpp CONFIG REQUIRED)
+############################################################################################################
 
 # Build the server executable
 add_executable(server server.cpp WebsocketServer.cpp)
-target_link_libraries (server jsoncpp)
+# target_link_libraries (server jsoncpp)
+
+target_link_libraries(server PRIVATE jsoncpp_object jsoncpp_static)
+target_link_libraries(server PRIVATE websocketpp::websocketpp)
+# target_link_libraries(server PRIVATE Boost::boost Boost::asio)
+target_link_libraries(server PRIVATE asio asio::asio)

@@ -1,10 +1,7 @@
 #include "WebsocketServer.h"
-
 #include <iostream>
 #include <thread>
 #include <asio/io_service.hpp>
-#include <typeinfo>
-#include <map>
 #include <string>
 //The port number the WebSocket server listens on
 #define PORT_NUMBER 8080
@@ -13,8 +10,8 @@ using namespace std;
 // interface
 // {"x": float, "y": float, "mode": int, "whiteSpace": bool}
 double x, y, z;
-int mode = 0;
-bool whiteSpace = false;
+int mode = 0; // 1: gyro, 0: btn
+bool whiteSpace = false; // true : press, 
 
 void websocketServerThread()
 {
@@ -70,6 +67,8 @@ void websocketServerThread()
 }
 
 int main() {
-	std::thread serverThread(websocketServerThread);
-	serverThread.join();
+	std::thread serverThread(websocketServerThread); // 第一行
+
+
+	serverThread.join(); // 放在最後面
 }
