@@ -1,7 +1,7 @@
-# 🎮📱  Motion Sensing Controller
+# 🎮 Motion Sensing Controller
 
 ## TLDR
-Turn your cellphone into a 3D motion-sensing controller.
+Turn your cellphone into a 3D motion-sensing wireless controller.
 
 ## Details
 // 原因
