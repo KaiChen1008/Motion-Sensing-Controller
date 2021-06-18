@@ -5,9 +5,12 @@ Turn your cellphone into a 3D motion-sensing wireless controller.
 
 ## Details
 // 原因
-This project is fully developed by Fullter 2.2 and can deploy on both Android and IOS cellphones.
+This project is fully developed by Fullter 2.2 and totally null-safe.
+It can be deployed on both Android and IOS cellphones.
 The goal of this project is to play vedio games using 3D motion.
-It is part of Graphic OpenGl Game Project.
+
+p.s. It is part of Graphic OpenGl Game Project.
+
 
 ## Prerequisites
 - Flutter 2.0
