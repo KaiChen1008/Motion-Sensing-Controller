@@ -18,7 +18,9 @@ p.s. It is part of Graphic OpenGl Game Project.
 ## Usage
 1. Installing
 ```
-git clone https://github.com/KaiChen1008/flutter-gyro-mqtt-app
+git clone https://github.com/KaiChen1008/Motion-Sensing-Controller
+
+cd Motion-Sensing-Controller
 
 flutter pub get
 
